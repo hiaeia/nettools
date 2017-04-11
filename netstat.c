@@ -53,6 +53,32 @@ union iaddr6 {
     } u;  
     unsigned char b[16];  
 };  
+#define u32 unsigned int;
+#define u64 unsigned long;
+union iaddr {
+    struct iaddr{
+        u32 u;
+    } iaddr;
+    struct iaddr6{
+        u32 a;
+        u32 b;
+        u32 c;
+        u32 d;
+    } iaddr6;
+};
+
+struct cache_entry {
+    struct iaddr addr;
+    u32 port;
+    u32 ino;
+};
+
+struct out_entry {
+    struct cache_entry key;
+    u32 uid;
+    u32 pid;
+    char name[128];
+};
 
 static const char *state2str(unsigned state)  
 {  
@@ -223,9 +249,26 @@ static void ipv6(const char *filename, const char *label) {
         }  
     }  
     fclose(fp);  
-}  
-  
-int main(int argc, char *argv[])  
+}
+
+int main(int argc, char *argv[]){
+    int timer = 57;
+    int fd;
+    
+    fd = open("/data/local/tmp/netstat.log", O_CREAT|O_APPEND);
+    if (fd < 0){
+        fprintf(stderr, "open /data/local/tmp/netstat.log failed\n");
+        return -1;
+    }
+    while(1){
+        write(fd, line, len);
+        fsync(fd);
+        sleep(timer);
+    }
+    close(fd);
+}
+
+int test()
 { 
     char process_name[16];
     memset(process_name, 0, 16);
